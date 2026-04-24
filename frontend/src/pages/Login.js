@@ -4,31 +4,26 @@ import { useNavigate } from "react-router-dom";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault(); // prevent reload
-
+    e.preventDefault();
     if (!email || !password) {
       alert("Please fill all fields");
       return;
     }
-
     try {
-      const res = await fetch("http://localhost:5000/login", {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
       const data = await res.json();
-      alert(data.message);
-
       if (data.message === "Login successful") {
-        navigate("/dashboard"); // go to dashboard
+        localStorage.setItem("token", data.token);
+        navigate("/dashboard");
+      } else {
+        alert(data.message);
       }
     } catch (err) {
       alert("Server error");
@@ -36,59 +31,60 @@ function Login() {
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h2>Login</h2>
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-600 flex items-center justify-center px-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
 
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <br /><br />
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="text-5xl mb-2">🅿️</div>
+          <h1 className="text-3xl font-bold text-blue-800">ParkVision</h1>
+          <p className="text-gray-500 text-sm mt-1">Smart Urban Parking</p>
+        </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <br /><br />
+        {/* Form */}
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
-        <button type="submit">Login</button>
-      </form>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
-      <p>
-        Don't have an account?{" "}
-        <span
-          style={{ color: "blue", cursor: "pointer" }}
-          onClick={() => navigate("/signup")}
-        >
-          Signup
-        </span>
-      </p>
+          <button
+            type="submit"
+            className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition duration-200"
+          >
+            Login
+          </button>
+        </form>
+
+        <p className="text-center text-sm text-gray-500 mt-6">
+          Don't have an account?{" "}
+          <span
+            onClick={() => navigate("/signup")}
+            className="text-blue-600 font-medium cursor-pointer hover:underline"
+          >
+            Sign up
+          </span>
+        </p>
+      </div>
     </div>
   );
 }
 
 export default Login;
-const jwt = require("jsonwebtoken");
-
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-
-  const user = await User.findOne({ email });
-  if (!user) return res.json({ message: "Invalid credentials" });
-
-  const match = await bcrypt.compare(password, user.password);
-  if (!match) return res.json({ message: "Invalid credentials" });
-
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-
-  res.json({ message: "Login successful", token });
-});
-if (data.message === "Login successful") {
-  localStorage.setItem("token", data.token);
-  navigate("/dashboard");
-}

@@ -4,31 +4,24 @@ import { useNavigate } from "react-router-dom";
 function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
-    e.preventDefault(); // prevent page reload
-
+    e.preventDefault();
     if (!email || !password) {
       alert("Please fill all fields");
       return;
     }
-
     try {
-      const res = await fetch("http://localhost:5000/signup", {
+      const res = await fetch("http://localhost:5000/api/auth/signup", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
       const data = await res.json();
       alert(data.message);
-
       if (data.message === "Signup successful") {
-        navigate("/"); // go to login
+        navigate("/");
       }
     } catch (err) {
       alert("Server error");
@@ -36,57 +29,60 @@ function Signup() {
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h2>Signup</h2>
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-600 flex items-center justify-center px-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
 
-      <form onSubmit={handleSignup}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <br /><br />
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="text-5xl mb-2">🅿️</div>
+          <h1 className="text-3xl font-bold text-blue-800">ParkVision</h1>
+          <p className="text-gray-500 text-sm mt-1">Create your account</p>
+        </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <br /><br />
+        {/* Form */}
+        <form onSubmit={handleSignup} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
-        <button type="submit">Signup</button>
-      </form>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
-      <p>
-        Already have an account?{" "}
-        <span
-          style={{ color: "blue", cursor: "pointer" }}
-          onClick={() => navigate("/")}
-        >
-          Login
-        </span>
-      </p>
-      
+          <button
+            type="submit"
+            className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition duration-200"
+          >
+            Sign Up
+          </button>
+        </form>
+
+        <p className="text-center text-sm text-gray-500 mt-6">
+          Already have an account?{" "}
+          <span
+            onClick={() => navigate("/")}
+            className="text-blue-600 font-medium cursor-pointer hover:underline"
+          >
+            Login
+          </span>
+        </p>
+      </div>
     </div>
   );
 }
 
 export default Signup;
-const bcrypt = require("bcryptjs");
-const User = require("./models/User");
-
-app.post("/signup", async (req, res) => {
-  const { email, password } = req.body;
-
-  const existing = await User.findOne({ email });
-  if (existing) return res.json({ message: "User already exists" });
-
-  const hashed = await bcrypt.hash(password, 10);
-
-  const user = new User({ email, password: hashed });
-  await user.save();
-
-  res.json({ message: "Signup successful" });
-});
