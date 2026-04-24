@@ -71,10 +71,39 @@ function BookSlot() {
     setStep(2);
   };
 
-  const handleConfirmBooking = () => {
-    alert(`Booking confirmed!\nArea: ${selectedArea.name}\nSlot: ${selectedSlot}\nDate: ${date}\nTime: ${time}\nDuration: ${duration} hour(s)`);
-    navigate("/my-bookings");
-  };
+  const handleConfirmBooking = async () => {
+  const token = localStorage.getItem("token");
+  const amount = duration === "1" ? 50 : duration === "2" ? 90 : duration === "3" ? 130 : duration === "4" ? 160 : 200;
+
+  try {
+    const res = await fetch("http://localhost:5000/api/bookings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        area: selectedArea.name,
+        location: selectedArea.location,
+        slot: selectedSlot,
+        date,
+        time,
+        duration: parseInt(duration),
+        amount,
+      }),
+    });
+
+    const data = await res.json();
+    if (data.message === "Booking successful") {
+      alert("Booking confirmed!");
+      navigate("/my-bookings");
+    } else {
+      alert(data.message);
+    }
+  } catch (err) {
+    alert("Server error");
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-100">

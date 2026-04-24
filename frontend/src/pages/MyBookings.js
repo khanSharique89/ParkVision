@@ -1,51 +1,47 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-const dummyBookings = [
-  {
-    id: 1,
-    area: "City Center Parking",
-    location: "MG Road, Indore",
-    slot: "A1",
-    date: "2025-04-25",
-    time: "10:00",
-    duration: 2,
-    amount: 90,
-    status: "active",
-  },
-  {
-    id: 2,
-    area: "Mall Parking",
-    location: "Vijay Nagar, Indore",
-    slot: "B2",
-    date: "2025-04-20",
-    time: "14:00",
-    duration: 1,
-    amount: 50,
-    status: "completed",
-  },
-  {
-    id: 3,
-    area: "Railway Station Parking",
-    location: "Station Road, Indore",
-    slot: "A3",
-    date: "2025-04-18",
-    time: "09:00",
-    duration: 3,
-    amount: 130,
-    status: "cancelled",
-  },
-];
 
 function MyBookings() {
   const navigate = useNavigate();
-  const [bookings, setBookings] = useState(dummyBookings);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleCancel = (id) => {
-    const confirmed = window.confirm("Are you sure you want to cancel this booking? Your payment will be refunded.");
-    if (confirmed) {
-      setBookings(bookings.map(b => b.id === id ? { ...b, status: "cancelled" } : b));
-      alert("Booking cancelled! Refund will be processed in 3-5 business days.");
+  const fetchBookings = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch("http://localhost:5000/api/bookings/my", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setBookings(data);
+    } catch (err) {
+      alert("Failed to load bookings");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  const handleCancel = async (id) => {
+    const confirmed = window.confirm("Cancel this booking? Your payment will be refunded.");
+    if (!confirmed) return;
+
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(`http://localhost:5000/api/bookings/cancel/${id}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.message === "Booking cancelled") {
+        alert("Booking cancelled! Refund in 3-5 business days.");
+        fetchBookings();
+      }
+    } catch (err) {
+      alert("Server error");
     }
   };
 
@@ -57,7 +53,6 @@ function MyBookings() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Navbar */}
       <nav className="bg-blue-800 text-white px-6 py-4 flex justify-between items-center shadow-md">
         <span className="text-xl font-bold">ParkVision</span>
         <button
@@ -71,7 +66,9 @@ function MyBookings() {
       <div className="px-6 py-8 max-w-3xl mx-auto">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">My Bookings</h2>
 
-        {bookings.length === 0 ? (
+        {loading ? (
+          <p className="text-center text-gray-500 mt-20">Loading...</p>
+        ) : bookings.length === 0 ? (
           <div className="text-center text-gray-500 mt-20">
             <p className="text-4xl mb-4">&#128203;</p>
             <p>No bookings yet.</p>
@@ -85,7 +82,7 @@ function MyBookings() {
         ) : (
           <div className="space-y-4">
             {bookings.map((booking) => (
-              <div key={booking.id} className="bg-white rounded-xl shadow p-5">
+              <div key={booking._id} className="bg-white rounded-xl shadow p-5">
                 <div className="flex justify-between items-start">
                   <div>
                     <h4 className="font-semibold text-gray-800">{booking.area}</h4>
@@ -119,7 +116,7 @@ function MyBookings() {
                   <p className="font-bold text-blue-700">&#8377;{booking.amount}</p>
                   {booking.status === "active" && (
                     <button
-                      onClick={() => handleCancel(booking.id)}
+                      onClick={() => handleCancel(booking._id)}
                       className="bg-red-500 text-white text-sm px-4 py-2 rounded-lg hover:bg-red-600 transition"
                     >
                       Cancel & Refund
