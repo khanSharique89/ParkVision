@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import BookSlot from "./pages/BookSlot";
 import MyBookings from "./pages/MyBookings";
 import Navigate from "./pages/Navigate";
+import AdminPanel from "./pages/AdminPanel";
 function App() {
   return (
     <Router>
@@ -16,6 +17,7 @@ function App() {
         <Route path="/book" element={<BookSlot />} />
         <Route path="/my-bookings" element={<MyBookings />} />
          <Route path="/navigate" element={<Navigate />} />
+          <Route path="/admin" element={<AdminPanel />} />
       </Routes>
     </Router>
   );
