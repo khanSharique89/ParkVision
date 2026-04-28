@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 function AdminPanel() {
   const navigate = useNavigate();
+  
   const [areas, setAreas] = useState([]);
   const [selectedArea, setSelectedArea] = useState(null);
   const [image, setImage] = useState(null);
@@ -56,19 +57,20 @@ function AdminPanel() {
       const res = await fetch(`http://localhost:5000/api/slots/detect/${selectedArea.areaId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          image: imageBase64,
-          rows: gridRows,
-          cols: gridCols,
-        }),
-      });
+       body: JSON.stringify({
+  image: imageBase64,
+  rows: gridRows,
+  cols: gridCols,
+}),
       const data = await res.json();
       if (data.area) {
-        setDetectedSlots(data.area.slots);
-        setCarsDetected(data.carsDetected || 0);
-        setMessage(`Detection complete! ${data.carsDetected || 0} cars detected by YOLO.`);
-        fetchAreas();
-      } else {
+  setDetectedSlots(data.area.slots);
+  setCarsDetected(data.carsDetected || 0);
+  if (data.detected_rows) setGridRows(data.detected_rows);
+  if (data.detected_cols) setGridCols(data.detected_cols);
+  setMessage(`Detection complete! ${data.carsDetected || 0} cars detected.${autoDetect ? ` Auto grid: ${data.detected_rows}x${data.detected_cols}` : ''}`);
+  fetchAreas();
+}else {
         setMessage("Detection failed: " + (data.message || "Unknown error"));
       }
     } catch (err) {
@@ -227,39 +229,32 @@ function AdminPanel() {
               {image && <img src={image} alt="Uploaded" className="mt-4 w-full max-h-64 object-cover rounded-lg" />}
             </div>
 
-            <div className="bg-white rounded-xl shadow p-6 mb-6">
-              <h3 className="font-semibold text-gray-800 mb-4">Grid Size (Rows x Columns)</h3>
-              <div className="flex gap-6 items-end">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Rows</label>
-                  <select value={gridRows} onChange={(e) => setGridRows(parseInt(e.target.value))} className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value={2}>2</option>
-<option value={3}>3</option>
-<option value={4}>4</option>
-<option value={5}>5</option>
-<option value={6}>6</option>
-<option value={7}>7</option>
-<option value={8}>8</option>
-<option value={9}>9</option>
-<option value={10}>10</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Columns</label>
-                  <select value={gridCols} onChange={(e) => setGridCols(parseInt(e.target.value))} className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value={3}>3</option>
-<option value={4}>4</option>
-<option value={5}>5</option>
-<option value={6}>6</option>
-<option value={7}>7</option>
-<option value={8}>8</option>
-<option value={9}>9</option>
-<option value={10}>10</option>
-                  </select>
-                </div>
-                <p className="text-sm text-gray-500 pb-2">Total slots: <span className="font-bold text-blue-700">{gridRows * gridCols}</span></p>
-              </div>
-            </div>
+   
+
+     {/* Manual grid controls - only show when Auto is OFF */}
+      {!autoDetect && (
+    <div className="flex gap-6 items-end mt-2">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Rows</label>
+        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+          <button onClick={() => setGridRows(Math.max(1, gridRows - 1))} className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold">−</button>
+          <span className="px-4 py-2 text-sm font-semibold">{gridRows}</span>
+          <button onClick={() => setGridRows(gridRows + 1)} className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold">+</button>
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Columns</label>
+        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+          <button onClick={() => setGridCols(Math.max(1, gridCols - 1))} className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold">−</button>
+          <span className="px-4 py-2 text-sm font-semibold">{gridCols}</span>
+          <button onClick={() => setGridCols(gridCols + 1)} className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold">+</button>
+        </div>
+      </div>
+      <p className="text-sm text-gray-500 pb-2">Total slots: <span className="font-bold text-blue-700">{gridRows * gridCols}</span></p>
+    </div>
+  )}
+</div>
+
 
             <button onClick={handleDetect} disabled={loading} className="w-full bg-blue-700 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition mb-6 disabled:opacity-50">
               {loading ? "Detecting with YOLOv8 AI..." : "Detect Slots with YOLOv8 AI"}
