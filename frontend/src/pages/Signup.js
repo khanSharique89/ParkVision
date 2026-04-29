@@ -4,31 +4,24 @@ import { useNavigate } from "react-router-dom";
 function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
-    e.preventDefault(); // prevent page reload
-
+    e.preventDefault();
     if (!email || !password) {
       alert("Please fill all fields");
       return;
     }
-
     try {
       const res = await fetch("/signup", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
       const data = await res.json();
       alert(data.message);
-
       if (data.message === "Signup successful") {
-        navigate("/"); // go to login
+        navigate("/");
       }
     } catch (err) {
       alert("Server error");
@@ -36,46 +29,52 @@ function Signup() {
   };
 
   return (
-    <div className="signup-container">
-      <div className="signup-card">
-        <h2>Join ParkVision</h2>
-        <p>Create your account to get started.</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-600 flex items-center justify-center px-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="text-5xl mb-2">🅿️</div>
+          <h1 className="text-3xl font-bold text-blue-800">ParkVision</h1>
+          <p className="text-gray-500 text-sm mt-1">Create your account</p>
+        </div>
 
-        <form onSubmit={handleSignup}>
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
+        <form onSubmit={handleSignup} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
-              id="email"
               type="email"
-              placeholder="Enter your email"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <input
-              id="password"
               type="password"
-              placeholder="Create a password"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          <button type="submit" className="submit-btn">Sign Up</button>
+          <button
+            type="submit"
+            className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition duration-200"
+          >
+            Sign Up
+          </button>
         </form>
 
-        <p className="auth-link">
-          Already have an account?{" "}
+        <p className="text-center text-sm text-gray-500 mt-6">
+          Already have an account?{' '}
           <span
-            className="link-text"
             onClick={() => navigate("/")}
+            className="text-blue-600 font-medium cursor-pointer hover:underline"
           >
-            Sign in here
+            Login
           </span>
         </p>
       </div>

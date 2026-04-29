@@ -4,34 +4,26 @@ import { useNavigate } from "react-router-dom";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault(); // prevent reload
-
+    e.preventDefault();
     if (!email || !password) {
       alert("Please fill all fields");
       return;
     }
-
     try {
       const res = await fetch("/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
       const data = await res.json();
-      console.log("login response", data);
-      alert(data.message);
-
       if (data.message === "Login successful") {
-        localStorage.setItem("token", data.token);
+        localStorage.setItem("token", data.token || "");
         navigate("/dashboard");
-        window.location.href = "/dashboard";
+      } else {
+        alert(data.message);
       }
     } catch (err) {
       alert("Server error");
@@ -39,46 +31,52 @@ function Login() {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h2>Login to ParkVision</h2>
-        <p>Welcome back! Please sign in to your account.</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-600 flex items-center justify-center px-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="text-5xl mb-2">🅿️</div>
+          <h1 className="text-3xl font-bold text-blue-800">ParkVision</h1>
+          <p className="text-gray-500 text-sm mt-1">Smart Urban Parking</p>
+        </div>
 
-        <form onSubmit={handleLogin}>
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
-              id="email"
               type="email"
-              placeholder="Enter your email"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <input
-              id="password"
               type="password"
-              placeholder="Enter your password"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          <button type="submit" className="submit-btn">Login</button>
+          <button
+            type="submit"
+            className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition duration-200"
+          >
+            Login
+          </button>
         </form>
 
-        <p className="auth-link">
-          Don't have an account?{" "}
+        <p className="text-center text-sm text-gray-500 mt-6">
+          Don't have an account?{' '}
           <span
-            className="link-text"
             onClick={() => navigate("/signup")}
+            className="text-blue-600 font-medium cursor-pointer hover:underline"
           >
-            Sign up here
+            Sign up
           </span>
         </p>
       </div>
