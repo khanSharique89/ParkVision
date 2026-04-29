@@ -16,7 +16,7 @@ function Login() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/login", {
+      const res = await fetch("/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -25,10 +25,13 @@ function Login() {
       });
 
       const data = await res.json();
+      console.log("login response", data);
       alert(data.message);
 
       if (data.message === "Login successful") {
-        navigate("/dashboard"); // go to dashboard
+        localStorage.setItem("token", data.token);
+        navigate("/dashboard");
+        window.location.href = "/dashboard";
       }
     } catch (err) {
       alert("Server error");
@@ -36,59 +39,51 @@ function Login() {
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h2>Login</h2>
+    <div className="login-container">
+      <div className="login-card">
+        <h2>Login to ParkVision</h2>
+        <p>Welcome back! Please sign in to your account.</p>
 
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <br /><br />
+        <form onSubmit={handleLogin}>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <br /><br />
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
-        <button type="submit">Login</button>
-      </form>
+          <button type="submit" className="submit-btn">Login</button>
+        </form>
 
-      <p>
-        Don't have an account?{" "}
-        <span
-          style={{ color: "blue", cursor: "pointer" }}
-          onClick={() => navigate("/signup")}
-        >
-          Signup
-        </span>
-      </p>
+        <p className="auth-link">
+          Don't have an account?{" "}
+          <span
+            className="link-text"
+            onClick={() => navigate("/signup")}
+          >
+            Sign up here
+          </span>
+        </p>
+      </div>
     </div>
   );
 }
 
 export default Login;
-const jwt = require("jsonwebtoken");
-
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-
-  const user = await User.findOne({ email });
-  if (!user) return res.json({ message: "Invalid credentials" });
-
-  const match = await bcrypt.compare(password, user.password);
-  if (!match) return res.json({ message: "Invalid credentials" });
-
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-
-  res.json({ message: "Login successful", token });
-});
-if (data.message === "Login successful") {
-  localStorage.setItem("token", data.token);
-  navigate("/dashboard");
-}

@@ -16,7 +16,7 @@ function Signup() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/signup", {
+      const res = await fetch("/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -36,57 +36,51 @@ function Signup() {
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h2>Signup</h2>
+    <div className="signup-container">
+      <div className="signup-card">
+        <h2>Join ParkVision</h2>
+        <p>Create your account to get started.</p>
 
-      <form onSubmit={handleSignup}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <br /><br />
+        <form onSubmit={handleSignup}>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <br /><br />
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="Create a password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
-        <button type="submit">Signup</button>
-      </form>
+          <button type="submit" className="submit-btn">Sign Up</button>
+        </form>
 
-      <p>
-        Already have an account?{" "}
-        <span
-          style={{ color: "blue", cursor: "pointer" }}
-          onClick={() => navigate("/")}
-        >
-          Login
-        </span>
-      </p>
-      
+        <p className="auth-link">
+          Already have an account?{" "}
+          <span
+            className="link-text"
+            onClick={() => navigate("/")}
+          >
+            Sign in here
+          </span>
+        </p>
+      </div>
     </div>
   );
 }
 
 export default Signup;
-const bcrypt = require("bcryptjs");
-const User = require("./models/User");
-
-app.post("/signup", async (req, res) => {
-  const { email, password } = req.body;
-
-  const existing = await User.findOne({ email });
-  if (existing) return res.json({ message: "User already exists" });
-
-  const hashed = await bcrypt.hash(password, 10);
-
-  const user = new User({ email, password: hashed });
-  await user.save();
-
-  res.json({ message: "Signup successful" });
-});
