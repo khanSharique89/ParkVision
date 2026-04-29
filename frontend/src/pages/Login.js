@@ -13,14 +13,14 @@ function Login() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch("/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
       if (data.message === "Login successful") {
-        localStorage.setItem("token", data.token);
+        localStorage.setItem("token", data.token || "");
         navigate("/dashboard");
       } else {
         alert(data.message);
@@ -33,15 +33,12 @@ function Login() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-600 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="text-5xl mb-2">🅿️</div>
           <h1 className="text-3xl font-bold text-blue-800">ParkVision</h1>
           <p className="text-gray-500 text-sm mt-1">Smart Urban Parking</p>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
@@ -74,7 +71,7 @@ function Login() {
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-6">
-          Don't have an account?{" "}
+          Don't have an account?{' '}
           <span
             onClick={() => navigate("/signup")}
             className="text-blue-600 font-medium cursor-pointer hover:underline"
